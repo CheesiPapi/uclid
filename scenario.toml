@@ -1,0 +1,10 @@
+# uclid/scenario.toml
+
+[environment]
+gravity = 9.81
+
+[entity]
+mass = 10.0
+radius = 25.0
+pos_x = 512.0
+pos_y = 100.0

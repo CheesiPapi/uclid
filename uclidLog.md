@@ -167,6 +167,7 @@ Raylib was written in C and for my Rust code to talk with Raylib, a crate called
 *bindgen* acts as an automatic translator from Rust to C and C to Rust.
 Although *bindgen* needs the LLVM compiler infrastructure (specifically the library called *libclang*).
 
+#### Git/GitHub Knowledge 1
 Was instructed to go to [LLVM GitHub Releases](https://github.com/llvm/llvm-project/releases), and download **LLVM-<version>-win64.exe**. I specifically used **LLVM-22.1.8-win64.exe**.
 Once the executable is ran, you follow the install wizard. 
 It is important to select **"Add LLVM to the system PATH for all users"**
@@ -190,12 +191,17 @@ If that.
 I initiated the git and made the first and second commits.
 
 #### 07/11/26
+#### Git/GitHub Knowledge 2
 I took the next day off and on the saturday to follow, I made the GitHub and first branch. 
 The location of the git on GitHub is https://github.com/CheesiPapi/uclid.git.
 Of course I can just get the info from my own computer, but I might send this log to different computers and I dont want to forget. 
 What am I saying. 
 This is a log, I dont have to explain myself.
 
+#### Git/GitHub knowledge 3
 Once main was made, I branched off to **week2-parser** branch. 
 All I have done so far on this branch is make this log. 
 I think i'm going to change the name and start making issues and making those branches associated with the issues being addressed like Dan taught me.
+I commited the log changes i made before and then pushed and merged it with main. 
+This was because the only changes i made that were different, were the log changes.
+Now that everything is nice and clean, I made a new branch called *1-issue-create-configuration-file*.
