@@ -1,6 +1,7 @@
 # UCLID  PHYSICS SIMULATOR
 This is a Log on things learned while building the UCLID physics engine. My goal for this physics engine is that it will be super light-weight and once compiled, the code runs on almost no cpu power. Again, that is the goal. 
 
+#### 07/09/26
 ## Phase (1)
 
 ### Initial Naming
@@ -145,3 +146,56 @@ esmos@CheesiBeasti MINGW64 ~/local_Documents/coding/uclid (master)
 $
 ```
 
+Gemini said that when i installed rust via rustup, it placed cargo and rustc executables into a hidden folder in the directory (~/.cargo/bin). 
+I just needed to refresh the current session by either *"source $HOME/.cargo/env"* or by simply closing the window and opening it back up again.
+I ran the build but it kicked back an error after a lot of compiliing.
+
+```
+running: "cmake" "--build" "C:\\Users\\esmos\\local_Documents\\coding\\uclid\\target\\debug\\build\\raylib-sys-84f1d04ca8b5f052\\out\\build" "--target" "install" "--config" "Debug" "--parallel" "24"
+
+
+
+  thread 'main' (35004) panicked at C:\Users\esmos\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bindgen-0.70.1\lib.rs:622:27:
+
+  Unable to find libclang: "couldn't find any valid shared libraries matching: ['clang.dll', 'libclang.dll'], set the `LIBCLANG_PATH` environment variable to a path where one of these files can be found (invalid: [])"
+
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace 
+```
+Gemini said this is something to do with C-interop on Windows. 
+The C-side of the compilation process was throwing a fit.
+Raylib was written in C and for my Rust code to talk with Raylib, a crate called *raylib-sys* uses a tool called *bindgen*.
+*bindgen* acts as an automatic translator from Rust to C and C to Rust.
+Although *bindgen* needs the LLVM compiler infrastructure (specifically the library called *libclang*).
+
+Was instructed to go to [LLVM GitHub Releases](https://github.com/llvm/llvm-project/releases), and download **LLVM-<version>-win64.exe**. I specifically used **LLVM-22.1.8-win64.exe**.
+Once the executable is ran, you follow the install wizard. 
+It is important to select **"Add LLVM to the system PATH for all users"**
+Then you restart the Forge.
+The Rust Forge is the official Rust ecosystem (*forge.rust-lang.org*).
+
+After that
+```
+cargo clean
+cargo run
+```
+
+Then it started working.
+A black screen pulled up and it says "uclid physics engine : running" on a black background.
+Beautiful.
+
+### Saving
+Apparently I was at the end of Phase 1.
+This took about 3-4 hours. 
+If that. 
+I initiated the git and made the first and second commits.
+
+#### 07/11/26
+I took the next day off and on the saturday to follow, I made the GitHub and first branch. 
+The location of the git on GitHub is https://github.com/CheesiPapi/uclid.git.
+Of course I can just get the info from my own computer, but I might send this log to different computers and I dont want to forget. 
+What am I saying. 
+This is a log, I dont have to explain myself.
+
+Once main was made, I branched off to **week2-parser** branch. 
+All I have done so far on this branch is make this log. 
+I think i'm going to change the name and start making issues and making those branches associated with the issues being addressed like Dan taught me.
