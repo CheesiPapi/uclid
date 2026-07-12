@@ -85,6 +85,26 @@ fn main() {
             }
         }
 
+        // --- PHYSICS UPDATE ---
+        // Only run physics if the console is closed
+        if current_state == AppState::Simulating {
+            // Calculate a fixed delta-time for 60 FPS
+            let dt = 1.0 / 60.0;
+            
+            // v = v0 + a*t
+            velocity_y += current_scenario.environment.gravity * dt;
+            
+            // p = p0 + v
+            current_scenario.entity.pos_y += velocity_y;
+
+            // Basic floor collision
+            let floor = 768.0 - current_scenario.entity.radius;
+            if current_scenario.entity.pos_y >= floor {
+                current_scenario.entity.pos_y = floor;
+                velocity_y *= -0.8; // Reverse velocity and lose 20% energy
+            }
+        }
+
         // Handle typing if the console is open
         if current_state == AppState::ConsoleOpen {
             if let Some(char_pressed) = rl.get_char_pressed() {
@@ -105,21 +125,48 @@ fn main() {
                 let target = parts.next().unwrap_or("");
                 let value = parts.next().unwrap_or("");
 
-                // Simple parser logic
-                if command == "set" && target == "gravity" {
-                    if let Ok(new_grav) = value.parse::<f32>() {
-                        current_scenario.environment.gravity = new_grav;
-                        println!("Gravity successfully updated to: {}", new_grav);
+// Advanced Parser Logic
+                if command == "set" {
+                    // First, try to parse the value into a float
+                    if let Ok(num_value) = value.parse::<f32>() {
+                        // Match the target string to the correct struct field
+                        match target {
+                            "gravity" => {
+                                current_scenario.environment.gravity = num_value;
+                                println!("Gravity updated to: {}", num_value);
+                            }
+                            "radius" => {
+                                current_scenario.entity.radius = num_value;
+                                println!("Radius updated to: {}", num_value);
+                            }
+                            "x" => {
+                                current_scenario.entity.pos_x = num_value;
+                                println!("X position updated to: {}", num_value);
+                            }
+                            "y" => {
+                                current_scenario.entity.pos_y = num_value;
+                                velocity_y = 0.0; // Reset velocity so it drops from a standstill
+                                println!("Y position updated to: {}", num_value);
+                            }
+                            _ => {
+                                // The '_' acts as a catch-all for any unknown words
+                                println!("Error: Unknown target '{}'. Try 'gravity', 'radius', 'x', or 'y'.", target);
+                            }
+                        }
                     } else {
-                        println!("Error: Could not parse '{}' as a number.", value);
+                        println!("Error: '{}' is not a valid number.", value);
+                    }
+                } else if command == "reset" {
+                    // A quick command to reload the TOML file from scratch
+                    let fresh_config = fs::read_to_string("scenario.toml").unwrap_or_default();
+                    if let Ok(fresh_scenario) = toml::from_str::<Scenario>(&fresh_config) {
+                        current_scenario = fresh_scenario;
+                        velocity_y = 0.0;
+                        println!("Scenario reset to TOML defaults.");
                     }
                 } else {
-                    println!("Command Sent: {}", console_input);
+                    println!("Error: Unknown command '{}'", command);
                 }
-                
-                console_input.clear();
-            }
-        }
 
         // --- DRAW PHASE ---
         let mut d = rl.begin_drawing(&thread);
