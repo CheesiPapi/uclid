@@ -205,3 +205,13 @@ I think i'm going to change the name and start making issues and making those br
 I commited the log changes i made before and then pushed and merged it with main. 
 This was because the only changes i made that were different, were the log changes.
 Now that everything is nice and clean, I made a new branch called *1-issue-create-configuration-file*.
+
+issue 1 was completed pretty quickly, as it was a scenario file. 
+This scenario file has values for the environment. 
+
+issue 2 was also completed pretty quickly.
+The src/main.rs file needed 
+*serde::Deserialize;* 
+*use std::fs;*
+The issue was closed out when these were added.
+

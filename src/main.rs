@@ -1,11 +1,28 @@
-// This is the main.rs file
-
 use raylib::prelude::*;
 use serde::Deserialize;
 use std::fs;
 
+// The top-level struct that holds the entire file
+#[derive(Deserialize, Debug)]
+struct Scenario {
+    environment: Environment,
+    entity: Entity,
+}
+
+#[derive(Deserialize, Debug)]
+struct Environment {
+    gravity: f32,
+}
+
+#[derive(Deserialize, Debug)]
+struct Entity {
+    mass: f32,
+    radius: f32,
+    pos_x: f32,
+    pos_y: f32,
+}
+
 // We use an Enum to strictly manage what the engine is allowed to do.
-// Deriving PartialEq allows us to easily compare current state with ==
 #[derive(PartialEq)]
 enum AppState {
     Simulating,
@@ -19,18 +36,27 @@ fn main() {
         .title("uclid - Kinematics Engine")
         .build();
 
-    // Lock the frame rate so physics don't run wild on your Ryzen 9
     rl.set_target_fps(60);
 
-    // 2. Initialize Engine State
+    // 2. Load the Configuration File
+    // Read the file directly from the disk
+    let config_raw = fs::read_to_string("scenario.toml")
+        .expect("Failed to find scenario.toml file in the root directory");
+    
+    // Let serde and the toml crate map the text into our Rust structs
+    let mut current_scenario: Scenario = toml::from_str(&config_raw)
+        .expect("Failed to parse the TOML file. Check for typos!");
+
+    // 3. Initialize Engine State
     let mut current_state = AppState::Simulating;
     let mut console_input = String::new();
+    let mut velocity_y: f32 = 0.0; // <--- ADD THIS LINE
 
-    // 3. The Core Execution Loop
+    // 4. The Core Execution Loop
     while !rl.window_should_close() {
-
+        
         // --- INPUT & UPDATE PHASE ---
-
+        
         // Toggle console with the Tilde/Grave key (`)
         if rl.is_key_pressed(KeyboardKey::KEY_GRAVE) {
             current_state = match current_state {
@@ -39,54 +65,89 @@ fn main() {
             };
         }
 
+        // --- PHYSICS UPDATE ---
+        // Only run physics if the console is closed
+        if current_state == AppState::Simulating {
+            // Calculate a fixed delta-time for 60 FPS
+            let dt = 1.0 / 60.0;
+            
+            // v = v0 + a*t
+            velocity_y += current_scenario.environment.gravity * dt;
+            
+            // p = p0 + v
+            current_scenario.entity.pos_y += velocity_y;
+
+            // Basic floor collision
+            let floor = 768.0 - current_scenario.entity.radius;
+            if current_scenario.entity.pos_y >= floor {
+                current_scenario.entity.pos_y = floor;
+                velocity_y *= -0.8; // Reverse velocity and lose 20% energy
+            }
+        }
+
         // Handle typing if the console is open
         if current_state == AppState::ConsoleOpen {
-            // Capture typed characters
             if let Some(char_pressed) = rl.get_char_pressed() {
-                // Basic check to ensure it's a printable ASCII character
                 if char_pressed as u32 >= 32 && char_pressed as u32 <= 126 {
                     console_input.push(char_pressed);
                 }
             }
 
-            // Handle backspace
             if rl.is_key_pressed(KeyboardKey::KEY_BACKSPACE) || rl.is_key_down(KeyboardKey::KEY_BACKSPACE) {
                 console_input.pop();
             }
-
-            // Handle execution (Enter key) - For now, just clears it
+            
+            // The Parser Execution Block
             if rl.is_key_pressed(KeyboardKey::KEY_ENTER) {
-                println!("Command Sent: {}", console_input); // Prints to standard terminal
+                // Split the typed command into words
+                let mut parts = console_input.trim().split_whitespace();
+                let command = parts.next().unwrap_or("");
+                let target = parts.next().unwrap_or("");
+                let value = parts.next().unwrap_or("");
+
+                // Simple parser logic
+                if command == "set" && target == "gravity" {
+                    if let Ok(new_grav) = value.parse::<f32>() {
+                        current_scenario.environment.gravity = new_grav;
+                        println!("Gravity successfully updated to: {}", new_grav);
+                    } else {
+                        println!("Error: Could not parse '{}' as a number.", value);
+                    }
+                } else {
+                    println!("Command Sent: {}", console_input);
+                }
+                
                 console_input.clear();
             }
         }
 
         // --- DRAW PHASE ---
-        // rl.begin_drawing creates a "RaylibDrawHandle".
-        // This takes a mutable reference to `rl`. The borrow checker loves this
-        // because it ensures nothing else can mutate `rl` while drawing is happening.
         let mut d = rl.begin_drawing(&thread);
 
-        d.clear_background(Color::new(15, 15, 18, 255)); // Deep charcoal background
+        d.clear_background(Color::new(15, 15, 18, 255));
 
-        // Draw the simulation elements
+        // Draw the simulation elements using our dynamic scenario data
         d.draw_text(
-            "uclid physics engine : running",
-            20, 20, 20,
+            &format!("uclid physics engine : running | Gravity: {:.2}", current_scenario.environment.gravity), 
+            20, 20, 20, 
             Color::DARKGRAY
+        );
+
+        // Draw the physical entity using the parsed TOML variables
+        d.draw_circle(
+            current_scenario.entity.pos_x as i32, 
+            current_scenario.entity.pos_y as i32, 
+            current_scenario.entity.radius, 
+            Color::RAYWHITE
         );
 
         // Draw the drop-down console over the simulation if active
         if current_state == AppState::ConsoleOpen {
-            // Draw a semi-transparent console window
             d.draw_rectangle(0, 0, 1024, 300, Color::new(20, 20, 20, 230));
             d.draw_line(0, 300, 1024, 300, Color::GREEN);
-
-            // Draw the prompt path and the user's input
+            
             let prompt = "uclid/engine>";
             d.draw_text(prompt, 20, 260, 20, Color::GREEN);
-
-            // Offset the typing cursor by the length of the prompt (roughly 140 pixels)
             d.draw_text(&console_input, 160, 260, 20, Color::RAYWHITE);
         }
     }
