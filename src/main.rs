@@ -1,6 +1,8 @@
 // This is the main.rs file
 
 use raylib::prelude::*;
+use serde::Deserialize;
+use std::fs;
 
 // We use an Enum to strictly manage what the engine is allowed to do.
 // Deriving PartialEq allows us to easily compare current state with ==
