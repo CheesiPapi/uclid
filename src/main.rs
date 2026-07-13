@@ -50,7 +50,10 @@ fn main() {
     // 3. Initialize Engine State
     let mut current_state = AppState::Simulating;
     let mut console_input = String::new();
-    let mut velocity_y: f32 = 0.0; // <--- ADD THIS LINE
+    let mut velocity_y: f32 = 0.0; // 
+
+    // trying to slow down the delete rate in the uclid terminal
+    let mut backspace_frames: u32 = 0;
 
     // 4. The Core Execution Loop
     while !rl.window_should_close() {
@@ -85,36 +88,24 @@ fn main() {
             }
         }
 
-        // --- PHYSICS UPDATE ---
-        // Only run physics if the console is closed
-        if current_state == AppState::Simulating {
-            // Calculate a fixed delta-time for 60 FPS
-            let dt = 1.0 / 60.0;
-            
-            // v = v0 + a*t
-            velocity_y += current_scenario.environment.gravity * dt;
-            
-            // p = p0 + v
-            current_scenario.entity.pos_y += velocity_y;
-
-            // Basic floor collision
-            let floor = 768.0 - current_scenario.entity.radius;
-            if current_scenario.entity.pos_y >= floor {
-                current_scenario.entity.pos_y = floor;
-                velocity_y *= -0.8; // Reverse velocity and lose 20% energy
-            }
-        }
-
-        // Handle typing if the console is open
+       // Handle typing if the console is open
         if current_state == AppState::ConsoleOpen {
             if let Some(char_pressed) = rl.get_char_pressed() {
                 if char_pressed as u32 >= 32 && char_pressed as u32 <= 126 {
                     console_input.push(char_pressed);
                 }
             }
-
-            if rl.is_key_pressed(KeyboardKey::KEY_BACKSPACE) || rl.is_key_down(KeyboardKey::KEY_BACKSPACE) {
-                console_input.pop();
+            
+            // custom typematic backspace
+            if rl.is_key_down(KeyboardKey::KEY_BACKSPACE) {
+                // delete immediately on the first frame, or every 2 frames after holding 30 frames (0.5s)
+                if backspace_frames == 0 || (backspace_frames > 30 && backspace_frames % 2 == 0) {
+                    console_input.pop();
+                }
+                backspace_frames += 1;
+            } else {
+                // reset the counter the moment the key is released
+                backspace_frames = 0;
             }
             
             // The Parser Execution Block
@@ -167,6 +158,10 @@ fn main() {
                 } else {
                     println!("Error: Unknown command '{}'", command);
                 }
+
+                console_input.clear();
+            }
+        }
 
         // --- DRAW PHASE ---
         let mut d = rl.begin_drawing(&thread);
