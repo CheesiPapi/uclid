@@ -198,6 +198,8 @@ Of course I can just get the info from my own computer, but I might send this lo
 What am I saying. 
 This is a log, I dont have to explain myself.
 
+## Phase (2)
+
 #### Git/GitHub knowledge 3
 Once main was made, I branched off to **week2-parser** branch. 
 All I have done so far on this branch is make this log. 
@@ -215,3 +217,35 @@ The src/main.rs file needed
 *use std::fs;*
 The issue was closed out when these were added.
 
+### 07/12/26
+
+### Rust Knowledge 1
+
+#### So Rust has functions that are used with *fn* **ex:** *fn main() {code stuff}*.Primitive types. 
+integers and char are examples of **primitive types**.
+- signed integers
+  - i8
+  - i16
+  - i32
+  - i64
+  - i128
+  - isize
+- unsigned integers
+  - u8
+  - u16
+  - u32
+  - u64
+  - u128
+  - usize
+  
+The number after the i or the u means that the number of bits for the number.
+*isize* and *usize* means the number of bits on your type of computer.
+The number of bits on your computer is called the architecture of your computer.
+So, *isize* and *usize* on a 32-bit computer is like *i32* and *u32*, and likewise on a 64-bit computer.
+The reasons for choosing different types of of integers is computer performance. 
+
+Characters in Rust are called *char*.
+Every *char* has a number: the letter *a* is number 65, while the &#21451; ("friend" in Chinese) is the number 21451. 
+The list of numbers is called "Unicode". Unicode uses smaller numbers for characters that are used more, like A through Z, or digits 0 though 9, or space.
+If you dont choose a type of integer, Rust will choose i32. 
+i32 is the default for integers.
