@@ -164,24 +164,27 @@ fn main() {
                         if let Some(Node::Directory { .. }) = vfs.get_node(&test_path) {
                             current_path = test_path;
                         } else {
-                            println!("Error: Directory '{}' not found.", target);
+                            console_output.push("Error: Directory '{}' not found.".to_string());
                         }
                     }
                 }
                 "ls" => {
-                    match vfs.ls(&current_path) {
-                        Some(files) => println!("Contents: {:?}", files),
-                        None => println!("Error: Cannot list contents here."),
+                    if let Some(files) = vfs.ls(&current_path) {
+                        console_output.push(format!("Contents: {:?}", files));
+                    } else {
+                        console_output.push("Error: Cannot list contents here.".to_string());
                     }
                 }
                 // Inside the match command block in main.rs:
                 "cat" => {
-                    if let Some(content) = vfs.cat(&*current_path, target) {
-                        console_output.push(content);
+                    if let Some(content) = vfs.cat(&current_path, target) {
+                    // Split the file by newlines so Raylib can draw each line
+                        for line in content.lines() {
+                            console_output.push(line.to_string());
+                        }
                     } else {
                         console_output.push(format!("Error: File '{}' not found or is a directory.", target));
                     }
-
                 }
                 
                 "" => {} // Ignore empty input
@@ -211,14 +214,24 @@ fn main() {
             Color::RAYWHITE
         );
 
-        // Draw the drop-down console over the simulation if active
+        // 3. Draw the terminal interface (The "Overlay" layer)
         if current_state == AppState::ConsoleOpen {
-            d.draw_rectangle(0, 0, 1024, 300, Color::new(20, 20, 20, 230));
-            d.draw_line(0, 300, 1024, 300, Color::GREEN);
+            // A. Draw the semi-transparent console box
+            d.draw_rectangle(0, 0, 1024, 500, Color::new(20, 20, 20, 230));
+            d.draw_line(0, 500, 1024, 500, Color::GREEN);
             
-            let prompt = "uclid/engine>";
-            d.draw_text(prompt, 20, 260, 20, Color::GREEN);
-            d.draw_text(&console_input, 160, 260, 20, Color::RAYWHITE);
+            // B. Draw the output history (The new part)
+            let mut y_pos = 460;
+            // Iterate through the buffer, taking only the latest entries
+            for line in console_output.iter().rev().take(20) {
+                d.draw_text(line, 20, y_pos, 20, Color::LIGHTGRAY);
+                y_pos -= 25; // Move up for each subsequent line
+            }
+
+            // C. Draw the current command prompt at the bottom
+            let prompt = format!("uclid/{}>", current_path.join("/"));
+            d.draw_text(&prompt, 20, 470, 20, Color::GREEN);
+            d.draw_text(&console_input, 160, 470, 20, Color::RAYWHITE);
         }
     }
 }
