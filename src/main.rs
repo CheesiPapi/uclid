@@ -1,6 +1,10 @@
+mod vfs; // Tells Rust to look for src/vfs.rs
+use crate::vfs::VirtualFileSystem;
 use raylib::prelude::*;
 use serde::Deserialize;
 use std::fs;
+use crate::vfs::Node;
+
 
 // The top-level struct that holds the entire file
 #[derive(Deserialize, Debug)]
@@ -38,6 +42,9 @@ fn main() {
 
     rl.set_target_fps(60);
 
+    let vfs = VirtualFileSystem::new(); // Initialize your file system
+    let mut current_path: Vec<String> = Vec::new(); // Tracks user's current directory 
+
     // 2. Load the Configuration File
     // Read the file directly from the disk
     let config_raw = fs::read_to_string("scenario.toml")
@@ -50,10 +57,18 @@ fn main() {
     // 3. Initialize Engine State
     let mut current_state = AppState::Simulating;
     let mut console_input = String::new();
-    let mut velocity_y: f32 = 0.0; // 
+    let mut console_output: Vec<String> = Vec::new();
+    let mut velocity_y: f32 = 0.0;
+
 
     // trying to slow down the delete rate in the uclid terminal
     let mut backspace_frames: u32 = 0;
+
+    let mut vfs = VirtualFileSystem {
+        root: VirtualFileSystem::load_from_disk("."), 
+        current_path: Vec::new(),
+    };
+    let mut current_path: Vec<String> = Vec::new();
 
     // 4. The Core Execution Loop
     while !rl.window_should_close() {
@@ -107,60 +122,73 @@ fn main() {
                 // reset the counter the moment the key is released
                 backspace_frames = 0;
             }
+        }
             
-            // The Parser Execution Block
-            if rl.is_key_pressed(KeyboardKey::KEY_ENTER) {
-                // Split the typed command into words
-                let mut parts = console_input.trim().split_whitespace();
-                let command = parts.next().unwrap_or("");
-                let target = parts.next().unwrap_or("");
-                let value = parts.next().unwrap_or("");
+        // The Parser Execution Block
+        if rl.is_key_pressed(KeyboardKey::KEY_ENTER) {
+            let mut parts = console_input.trim().split_whitespace();
+            let command = parts.next().unwrap_or("");
+            let target = parts.next().unwrap_or("");
+            let value = parts.next().unwrap_or("");
 
-// Advanced Parser Logic
-                if command == "set" {
-                    // First, try to parse the value into a float
+            // --- REPLACED: The entire if/else block ---
+            match command {
+                "set" => {
                     if let Ok(num_value) = value.parse::<f32>() {
-                        // Match the target string to the correct struct field
                         match target {
-                            "gravity" => {
-                                current_scenario.environment.gravity = num_value;
-                                println!("Gravity updated to: {}", num_value);
-                            }
-                            "radius" => {
-                                current_scenario.entity.radius = num_value;
-                                println!("Radius updated to: {}", num_value);
-                            }
-                            "x" => {
-                                current_scenario.entity.pos_x = num_value;
-                                println!("X position updated to: {}", num_value);
-                            }
+                            "gravity" => current_scenario.environment.gravity = num_value,
+                            "radius" => current_scenario.entity.radius = num_value,
+                            "x" => current_scenario.entity.pos_x = num_value,
                             "y" => {
                                 current_scenario.entity.pos_y = num_value;
-                                velocity_y = 0.0; // Reset velocity so it drops from a standstill
-                                println!("Y position updated to: {}", num_value);
+                                velocity_y = 0.0;
                             }
-                            _ => {
-                                // The '_' acts as a catch-all for any unknown words
-                                println!("Error: Unknown target '{}'. Try 'gravity', 'radius', 'x', or 'y'.", target);
-                            }
+                            _ => println!("Error: Unknown target '{}'.", target),
                         }
                     } else {
                         println!("Error: '{}' is not a valid number.", value);
                     }
-                } else if command == "reset" {
-                    // A quick command to reload the TOML file from scratch
-                    let fresh_config = fs::read_to_string("scenario.toml").unwrap_or_default();
-                    if let Ok(fresh_scenario) = toml::from_str::<Scenario>(&fresh_config) {
+                }
+                "reset" => {
+                    if let Ok(fresh_scenario) = toml::from_str::<Scenario>(&fs::read_to_string("scenario.toml").unwrap_or_default()) {
                         current_scenario = fresh_scenario;
                         velocity_y = 0.0;
-                        println!("Scenario reset to TOML defaults.");
                     }
-                } else {
-                    println!("Error: Unknown command '{}'", command);
                 }
+                "cd" => {
+                    if target == ".." {
+                        if !current_path.is_empty() { current_path.pop(); }
+                    } else if !target.is_empty() {
+                        let mut test_path = current_path.clone();
+                        test_path.push(target.to_string());
+                        if let Some(Node::Directory { .. }) = vfs.get_node(&test_path) {
+                            current_path = test_path;
+                        } else {
+                            println!("Error: Directory '{}' not found.", target);
+                        }
+                    }
+                }
+                "ls" => {
+                    match vfs.ls(&current_path) {
+                        Some(files) => println!("Contents: {:?}", files),
+                        None => println!("Error: Cannot list contents here."),
+                    }
+                }
+                // Inside the match command block in main.rs:
+                "cat" => {
+                    if let Some(content) = vfs.cat(&*current_path, target) {
+                        console_output.push(content);
+                    } else {
+                        console_output.push(format!("Error: File '{}' not found or is a directory.", target));
+                    }
 
-                console_input.clear();
+                }
+                
+                "" => {} // Ignore empty input
+                _ => println!("Error: Unknown command '{}'", command),
             }
+
+            console_input.clear();
         }
 
         // --- DRAW PHASE ---
