@@ -198,7 +198,7 @@ Of course I can just get the info from my own computer, but I might send this lo
 What am I saying. 
 This is a log, I dont have to explain myself.
 
-## Phase (2)
+## Phase (2) Terminal
 
 #### Git/GitHub knowledge 3
 Once main was made, I branched off to **week2-parser** branch. 
@@ -249,3 +249,89 @@ Every *char* has a number: the letter *a* is number 65, while the &#21451; ("fri
 The list of numbers is called "Unicode". Unicode uses smaller numbers for characters that are used more, like A through Z, or digits 0 though 9, or space.
 If you dont choose a type of integer, Rust will choose i32. 
 i32 is the default for integers.
+
+## Phase (3) The Drivetrain
+### Rust Knowledge 2
+#### Date 07/18/26
+Cargo does not require a virtual environment.
+Cargo downloads dependencies (like raylib, egui, etc) into the Cargo.toml file.
+Cargo downloads it specifically for that project and links it directly into your local target/ folder.
+This way your Rust project cannot bleed over into other Rust project on the computer.
+There is no "activation" step like 'source .venv/bin/activate before you start working.
+This is because Rust automatically figures out what version of which libraries you need based on the Cargo.lock file.
+Just open the terminal, navigate to your project folder and type 'cargo run'.<br>
+**caveat**<br>
+The only thing that comes close to a virtual environment is rustup. 
+rustup does not isolate the *libraries* but the *compilers*.
+It allows you to switch between different versions of the Rust compiler (like stable, beta, or nightly (dont know what nightly means)).
+
+### Python Knowledge 1
+So Python needs a virtual environment because pip wants to overwrite things.<br>
+**The "highlander" problem.**<br>
+By default, Python has a single, global folder on the computer where it stores libraries.
+if you tell pip to install a library (like vtk or numpy), it drops it into that global file.
+If there are two different Python projects
+- Project A (an older script) requires an older version of numpy (v1.20)
+- Project B (my new gravity sim) requires the newest version of numpy (v2.0)
+Because Python only has one global folder, if you install numpy v2.0 for project B, pip will completely overwrite and delete numpy v1.20.
+Project A is now broken, and if you fix Project A, Project B breaks.<br>
+**The OS Safety Net**<br>
+if you make a python project file and do not utilize a virtual environment, you could disrupt or damage modern operating systems in the OS.<br>
+**the .venv solution**<br>
+A .venv is just a completely isolated sandbox folder.
+when you activate it, you tell Python: "for this specific terminal session, pretend the rest of the computer does not exist.
+Only ust the tools and libraries inside this specific folder.".
+
+### Virtual File System (VFS)
+Blueprint will be making the Node struct, getting the Current Working Directory (CWD) operational, and Navigation Logic.
+
+In Rust, because a directory needs to contain a collection of other nodes (files or subdirectories), we use an Enum to represent two possible types.
+
+```
+use std::collections::HashMap;
+
+// A node is either a File or a Directory
+pub enum Node {
+    File {
+        content: String,
+    },
+    Directory {
+        children: HashMap<String, Node>,
+    },
+}
+
+// A wrapper to help manage the name and type
+pub struct FileSystemNode {
+    pub name: String,
+    pub node_type: Node,
+}
+```
+### Rust Knowledge 3
+In Rust, Enums are data containers. 
+These can hold different types of information for each option.
+An Enum can be thought of as a custom box that can only ever contain one specific item at a time.
+You define what kind of time goes in each version of the box.<br>
+#### *ex 1. The Simple Enum (The "Nickname" Idea)*<br>
+If you need states, you are just using the Enum to represent a status.<br>
+**Rust**
+```
+enum State {
+    Running,
+    Paused,
+    Stopped,
+}
+```
+Here the states have nicknames.
+
+#### *ex 2. The Rust Enum (The "Data Container")*<br>
+**Rust**
+```
+pub enum Node {
+    File { content: String },  // This 'box' holds a string of text
+    Directory { children: HashMap<String, Node> }, // This 'box' holds a map of other nodes
+}
+```
+When you look at this Node Enum, you can see that it isnt jsut a label.
+It defines exactly that node *is* and what it *contains*.
+- If it is a ==File==, it must have content
+- If it is a ==Directory==, it must have a map of children
