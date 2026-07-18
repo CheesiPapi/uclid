@@ -335,3 +335,43 @@ When you look at this Node Enum, you can see that it isnt jsut a label.
 It defines exactly that node *is* and what it *contains*.
 - If it is a ==File==, it must have content
 - If it is a ==Directory==, it must have a map of children
+
+#### *Why is this better for the uclid engine*<br>
+If we tried to do this with the nicknames method, we'd need to build many if/else checks to see if the node is a file or folder.
+then manually case the data.
+With Rust's Enum, the compiler forces you to handle the data correctly:<br>
+**Rust**<br>
+```
+match my_node {
+    Node::File { content } => println!("It's a file with: {}", content),
+    Node::Directory { children } => println!("It's a folder with {} items", children),
+}
+```
+The compiler knows that inside the ==File== variant, there is a ==content== string, and it won't let you try access ==children== if it's a ==File==.
+
+
+**In the ==vfs.rs== file I wrote down some important notes on Rust syntax.**
+
+This file creates a rood ==Directory== node. 
+It then inserts a file named ==hello.txt==.
+It creates a sub-directory which contains its own ==pendulum.sim== file.
+It initializes the ==current_path== as an empty vector, meaning you are currently at the "top" level.
+
+==use== is a ==path shortener==
+is i wrote use Jerry::Smith as dummy;
+from now on, when i use dummy, it knows i mean Jerry::Smith
+```
+use std::collections::HashMap;
+```
+
+A Rust specific rule
+everything in Rust is private by default
+if you want to ==use== something from another module, 
+you have to explicitly mark it as ==pub== (public) in that module
+```
+#[derive(Debug)]
+pub enum Node {
+    File { content: String },
+    Directory { children: HashMap<String, Node> },
+}
+```
