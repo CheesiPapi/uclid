@@ -1,0 +1,17 @@
+[package]
+name = "uclid"
+version = "0.1.0"
+edition = "2021"
+description = "A terminal-driven, hardware-accelerated physics simulation engine."
+# Replace with your actual name/email when you open-source it
+authors = ["Ethan Moss esmoss17@outlook.com"] 
+
+[dependencies]
+# Graphics and Windowing (Week 1 & 4)
+# raylib-rs is the safest, most maintained Rust binding for Raylib
+raylib = "5.0" 
+
+# Serialization & Parsing (Week 2 & 3)
+# These will allow you to read your scenario.toml files effortlessly
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
