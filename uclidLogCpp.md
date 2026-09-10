@@ -46,4 +46,19 @@ int add(int a, int b){
 
 This file just wants to use the tool. It only needs to look at the header file to know how to use it.
 
+## How to set up ssh to github
+
+Navigate to the locale repo folder.
+enter this command:
+```
+git remote set-url origin git@github.com:<username>/<reponame>.git
+```
+And thats it. 
+You can check its status or if it worked by entering this command:
+```
+git remote -v
+```
+This will tell you which repo it pushs to if you did it right.
+
+Now you can fetch and push all you want.
 
