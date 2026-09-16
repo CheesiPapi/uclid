@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/uclid.dir/link.d CMakeFiles/uclid.dir/src/main.cpp.o CMakeFiles/uclid.dir/src/World.cpp.o -o uclid  -ltomlplusplus -lraylib

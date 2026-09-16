@@ -1,0 +1,3 @@
+/home/esmoss/Desktop/sdcard-link/uclid/build/CMakeFiles/uclid.dir
+/home/esmoss/Desktop/sdcard-link/uclid/build/CMakeFiles/edit_cache.dir
+/home/esmoss/Desktop/sdcard-link/uclid/build/CMakeFiles/rebuild_cache.dir
