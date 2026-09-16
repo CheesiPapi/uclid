@@ -1,7 +1,7 @@
-cmake_minimum_required(Version 3.15)
+cmake_minimum_required(VERSION 3.15)
 
 # Name the project and specify C++ as the language 
-project(uclid Version 1.0 LANGUAGES CXX)
+project(uclid VERSION 1.0 LANGUAGES CXX)
 
 # Enforce modern C++ (C++17 is great for libraries like toml++)
 set(CMAKE_CXX_STANDARD 17)
@@ -38,4 +38,5 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/i
 # target_link_libraries(${PROJECT_NAME} PRIVATE ExternalLibrary)
 
 # Link the downloaded library to your uclid executable
-target_link_libraries(${PROJECT_NAME} PRIVATE tomlplusplus::tomlplusplus)
+target_link_libraries(${PROJECT_NAME} PRIVATE tomlplusplus)
+target_link_libraries(uclid PRIVATE raylib)

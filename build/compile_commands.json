@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/home/esmoss/Desktop/sdcard-link/uclid/build",
+  "command": "/usr/bin/c++  -I/home/esmoss/Desktop/sdcard-link/uclid/include -std=gnu++17 -o CMakeFiles/uclid.dir/src/main.cpp.o -c /home/esmoss/Desktop/sdcard-link/uclid/src/main.cpp",
+  "file": "/home/esmoss/Desktop/sdcard-link/uclid/src/main.cpp",
+  "output": "CMakeFiles/uclid.dir/src/main.cpp.o"
+},
+{
+  "directory": "/home/esmoss/Desktop/sdcard-link/uclid/build",
+  "command": "/usr/bin/c++  -I/home/esmoss/Desktop/sdcard-link/uclid/include -std=gnu++17 -o CMakeFiles/uclid.dir/src/World.cpp.o -c /home/esmoss/Desktop/sdcard-link/uclid/src/World.cpp",
+  "file": "/home/esmoss/Desktop/sdcard-link/uclid/src/World.cpp",
+  "output": "CMakeFiles/uclid.dir/src/World.cpp.o"
+}
+]
